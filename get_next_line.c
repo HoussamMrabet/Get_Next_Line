@@ -41,13 +41,28 @@ static int	ft_read(char **saves, int fd)
 {
 	char	*buffer;
 	int		length;
+	long	length;
+	long	l;
+	size_t	i;
 
-	buffer = (char *)malloc((size_t)BUFFER_SIZE + 1);
+	length = 0;
+	l = 0;
+	i = (size_t)BUFFER_SIZE;
+	buffer = (char *)malloc(i + 1);
 	if (!buffer)
 		return (free(*saves), *saves = NULL, -1);
+	while (i > INT_MAX)
+	{
+		length += read(fd, buffer, INT_MAX);
+		if (length <= 0)
+			return (free(buffer), length);
+		i -= INT_MAX;
+	}
+	l = length;
 	length = read(fd, buffer, BUFFER_SIZE);
 	if (length <= 0)
 		return (free(buffer), length);
+	l += length;
 	*(buffer + length) = '\0';
 	*saves = ft_strjoin(*saves, buffer);
 	free(buffer);
@@ -59,7 +74,7 @@ static int	ft_read(char **saves, int fd)
 char	*get_next_line(int fd)
 {
 	static char	*saves = NULL;
-	int			length;
+	long			length;
 
 	if (fd < 0 || fd > 10240 || BUFFER_SIZE <= 0 || read(fd, NULL, 0) < 0)
 		return (free(saves), saves = NULL, NULL);
