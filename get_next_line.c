@@ -40,7 +40,6 @@ static char	*ft_get_line(char **s)
 static int	ft_read(char **saves, int fd)
 {
 	char	*buffer;
-	int		length;
 	long	length;
 	long	l;
 	size_t	i;
