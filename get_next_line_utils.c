@@ -6,30 +6,20 @@
 /*   By: hmrabet <hmrabet@student.1337.ma>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/15 14:14:27 by hmrabet           #+#    #+#             */
-/*   Updated: 2023/11/27 00:23:25 by hmrabet          ###   ########.fr       */
+/*   Updated: 2023/12/20 12:24:32 by hmrabet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-static size_t	ft_strlen(char *s)
+int	ft_strchr(char *s, int *len, char c)
 {
-	size_t	i;
-
-	i = 0;
-	while (*(s + i))
-		i++;
-	return (i);
-}
-
-int	ft_strchr(char *s, char c)
-{
-	size_t	i;
+	int	i;
 
 	i = 0;
 	if (!s)
 		return (-1);
-	while (*(s + i))
+	while (i < *len)
 	{
 		if (*(s + i) == c)
 			return (i);
@@ -38,38 +28,38 @@ int	ft_strchr(char *s, char c)
 	return (-1);
 }
 
-static char	*ft_strcpy(char *dst, char *src)
+static char	*ft_strcpy(char *dst, char *src, int len)
 {
-	size_t	i;
+	int	i;
 
 	i = 0;
-	while (*(src + i))
+	while (i < len)
 	{
 		*(dst + i) = *(src + i);
 		i++;
 	}
-	return (*(dst + i) = '\0', dst);
+	return (dst);
 }
 
-char	*ft_strdup(char *s)
+char	*ft_strdup(char *s, int len)
 {
 	char	*str;
 
-	str = (char *)malloc(sizeof(char) * (ft_strlen(s) + 1));
+	str = (char *)malloc(sizeof(char) * len);
 	if (!str)
 		return (free(str), NULL);
-	return (ft_strcpy(str, s), str);
+	return (ft_strcpy(str, s, len), str);
 }
 
-char	*ft_strjoin(char *s1, char *s2)
+char	*ft_strjoin(char *s1, int len, char *s2, int length)
 {
 	char	*str;
 
 	if (!s1)
-		return (ft_strdup(s2));
-	str = (char *)malloc(ft_strlen(s1) + ft_strlen(s2) + 1);
+		return (ft_strdup(s2, length));
+	str = (char *)malloc(len + length);
 	if (!str)
 		return (free(s1), NULL);
-	return (ft_strcpy(str, s1), ft_strcpy(str + ft_strlen(s1), s2),
+	return (ft_strcpy(str, s1, len), ft_strcpy(str + len, s2, length),
 		free(s1), str);
 }

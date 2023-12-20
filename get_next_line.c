@@ -6,52 +6,52 @@
 /*   By: hmrabet <hmrabet@student.1337.ma>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/15 14:13:43 by hmrabet           #+#    #+#             */
-/*   Updated: 2023/11/29 16:00:40 by hmrabet          ###   ########.fr       */
+/*   Updated: 2023/12/20 12:25:05 by hmrabet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-static char	*ft_get_line(char **s)
+static char	*ft_get_line(char **s, int *len)
 {
 	char	*str;
 	char	*tmp;
-	size_t	i;
-	size_t	j;
+	int		i;
+	int		j;
 
 	i = 0;
 	j = 0;
-	while (*(*s + i) && *(*s + i) != '\n')
+	while (i < *len && *(*s + i) != '\n')
 		i++;
 	if (*(*s + i) == '\n')
 		i++;
 	str = (char *)malloc(i + 1);
 	if (!str)
-		return (free(*s), *s = NULL, NULL);
+		return (free(*s), *s = NULL, *len = 0, NULL);
 	while (j < i)
 	{
 		*(str + j) = *(*s + j);
 		j++;
 	}
-	return (*(str + j) = '\0', tmp = ft_strdup(*s + i),
-		free(*s), *s = tmp, str);
+	*(str + j) = '\0';
+	return (tmp = ft_strdup(*s + i, *len - i),
+		free(*s), *s = tmp, *len = *len - i, str);
 }
 
-static int	ft_read(char **saves, int fd)
+static int	ft_read(char **saves, int fd, int *len)
 {
 	char	*buffer;
 	int		length;
 
-	buffer = (char *)malloc((size_t)BUFFER_SIZE + 1);
+	buffer = (char *)malloc(BUFFER_SIZE);
 	if (!buffer)
 		return (free(*saves), *saves = NULL, -1);
 	length = read(fd, buffer, BUFFER_SIZE);
 	if (length <= 0)
 		return (free(buffer), length);
-	*(buffer + length) = '\0';
-	*saves = ft_strjoin(*saves, buffer);
+	*saves = ft_strjoin(*saves, *len, buffer, length);
 	free(buffer);
-	if (!saves || !*saves)
+	if (!saves)
 		return (-1);
 	return (length);
 }
@@ -59,14 +59,20 @@ static int	ft_read(char **saves, int fd)
 char	*get_next_line(int fd)
 {
 	static char	*saves = NULL;
+	static int	saves_len = 0;
 	int			length;
 
-	if (fd < 0 || fd > 10240 || BUFFER_SIZE <= 0 || read(fd, NULL, 0) < 0)
+	if (fd < 0 || fd > OPEN_MAX || BUFFER_SIZE <= 0 || BUFFER_SIZE > INT_MAX
+		|| read(fd, NULL, 0) < 0)
 		return (free(saves), saves = NULL, NULL);
 	length = 1;
-	while (ft_strchr(saves, '\n') == -1 && length > 0)
-		length = ft_read(&saves, fd);
-	if (length <= 0 && (!saves || !*saves))
-		return (free(saves), saves = NULL, NULL);
-	return (ft_get_line(&saves));
+	while (ft_strchr(saves, &saves_len, '\n') == -1 && length > 0)
+	{
+		length = ft_read(&saves, fd, &saves_len);
+		if (length > 0)
+			saves_len += length;
+	}
+	if (length <= 0 && (!saves || saves_len == 0))
+		return (free(saves), saves = NULL, saves_len = 0, NULL);
+	return (ft_get_line(&saves, &saves_len));
 }
