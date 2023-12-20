@@ -6,7 +6,7 @@
 /*   By: hmrabet <hmrabet@student.1337.ma>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/15 14:13:43 by hmrabet           #+#    #+#             */
-/*   Updated: 2023/12/20 12:25:05 by hmrabet          ###   ########.fr       */
+/*   Updated: 2023/12/20 18:02:39 by hmrabet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,9 @@ static char	*ft_get_line(char **s, int *len)
 	j = 0;
 	while (i < *len && *(*s + i) != '\n')
 		i++;
-	if (*(*s + i) == '\n')
-		i++;
+	if (i < *len)
+		if (*(*s + i) == '\n')
+			i++;
 	str = (char *)malloc(i + 1);
 	if (!str)
 		return (free(*s), *s = NULL, *len = 0, NULL);
@@ -43,12 +44,13 @@ static int	ft_read(char **saves, int fd, int *len)
 	char	*buffer;
 	int		length;
 
-	buffer = (char *)malloc(BUFFER_SIZE);
+	buffer = (char *)malloc((size_t)BUFFER_SIZE + 1);
 	if (!buffer)
 		return (free(*saves), *saves = NULL, -1);
 	length = read(fd, buffer, BUFFER_SIZE);
 	if (length <= 0)
 		return (free(buffer), length);
+	buffer[length] = '\0';
 	*saves = ft_strjoin(*saves, *len, buffer, length);
 	free(buffer);
 	if (!saves)
